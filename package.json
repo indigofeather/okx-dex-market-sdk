@@ -1,0 +1,54 @@
+{
+  "name": "okx-dex-market-sdk",
+  "version": "0.1.0",
+  "description": "OKX DEX Market SDK with a typed request builder and unified APIs.",
+  "author": {
+    "name": "Lance He",
+    "email": "indigofeather@gmail.com"
+  },
+  "type": "module",
+  "license": "MIT",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "dependencies": {
+    "crypto-js": "^4.2.0",
+    "undici": "^7.15.0"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/indigofeather/okx-dex-market-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/indigofeather/okx-dex-market-sdk/issues"
+  },
+  "homepage": "https://github.com/indigofeather/okx-dex-market-sdk#readme",
+  "scripts": {
+    "lint": "biome check",
+    "format": "biome format --write",
+    "typecheck": "tsc --noEmit",
+    "check": "bun run lint && bun run typecheck",
+    "build": "tsup src/index.ts --dts --format esm,cjs --out-dir dist",
+    "clean": "rm -rf dist",
+    "prepare": "bun run clean && bun run build"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.2.2",
+    "@types/crypto-js": "^4.2.2",
+    "@types/node": "^24.3.0",
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.2"
+  }
+}
