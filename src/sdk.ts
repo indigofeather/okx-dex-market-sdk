@@ -96,7 +96,7 @@ export class OKXDexSDK {
    * @param params.limit Optional page size
    * @returns Recent trades
    */
-  marketTrades(params: { chainIndex: string; tokenContractAddress: string; after?: string; limit?: string }) {
+  marketTrades(params: { chainIndex: string; tokenContractAddress: string; after?: string; limit?: number }) {
     const { chainIndex, tokenContractAddress, after, limit = 100 } = params;
     return this.client.getJSON<
       {
