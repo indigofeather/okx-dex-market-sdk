@@ -1,5 +1,7 @@
 # OKX DEX Market SDK
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/indigofeather/okx-dex-market-sdk)
+
 A minimal, class‑based TypeScript SDK for OKX DEX Market and Balance APIs. It focuses on a clean developer experience and predictable behavior by exposing a single entry point class and keeping the transport logic simple and explicit.
 
 ## Highlights
