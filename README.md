@@ -10,6 +10,26 @@ A minimal, class‑based TypeScript SDK for OKX DEX Market and Balance APIs. It 
 - No hidden retries or backoff (you own the control flow)
 - ESM and CJS builds with bundled types
 
+## Installation
+
+Install the package from npm using your preferred manager:
+
+```bash
+npm i okx-dex-market-sdk
+# or
+pnpm add okx-dex-market-sdk
+# or
+yarn add okx-dex-market-sdk
+# or
+bun add okx-dex-market-sdk
+```
+
+## Runtime
+
+- Node.js 18+ recommended (uses `undici` for HTTP).
+- Designed for server/runtime use; not intended for direct browser usage.
+- Provides both ESM (`module`) and CJS (`main`) builds with types.
+
 ## Design Principles
 
 - Simplicity over magic: no implicit global state or side effects.
@@ -29,7 +49,7 @@ Required variables:
 
 Example `.env` contents:
 
-```
+```ini
 OKX_API_KEY=your_api_key_here
 OKX_SECRET_KEY=your_secret_key_here
 OKX_API_PASSPHRASE=your_passphrase_here
@@ -42,9 +62,22 @@ Security Notes:
 - In production, set these via your platform’s secret manager (Vercel/Netlify/Cloudflare Workers/AWS/GCP/etc.).
 - If you prefer not to use environment variables, you can pass credentials via the `OKXDexSDK` constructor (see upcoming usage section).
 
-## Status
+## SDK Options
 
-Active development. More endpoints and types will be added. Usage examples will be documented after the remaining methods are finalized.
+The constructor accepts the following optional fields. Defaults shown in comments.
+
+```ts
+type SDKOptions = {
+  baseUrl?: string; // default: 'https://web3.okx.com'
+  timeoutMs?: number; // default: 10000
+  credentials?: {
+    apiKey: string;
+    secretKey: string;
+    passphrase: string;
+    projectId: string;
+  }; // default: read from env vars
+};
+```
 
 ## Usage
 
@@ -52,16 +85,16 @@ Initialize the SDK and call methods. The SDK returns parsed JSON data (the `data
 
 Basic initialization (reads credentials from environment variables):
 
-```
-import { OKXDexSDK } from 'okx-dex-market-sdk';
+```ts
+import { OKXDexSDK } from "okx-dex-market-sdk";
 
 const sdk = new OKXDexSDK();
 ```
 
 Initialization with explicit credentials:
 
-```
-import { OKXDexSDK } from 'okx-dex-market-sdk';
+```ts
+import { OKXDexSDK } from "okx-dex-market-sdk";
 
 const sdk = new OKXDexSDK({
   credentials: {
@@ -75,175 +108,201 @@ const sdk = new OKXDexSDK({
 });
 ```
 
+CommonJS usage:
+
+```ts
+const { OKXDexSDK } = require("okx-dex-market-sdk");
+const sdk = new OKXDexSDK();
+```
+
 Error handling example:
 
-```
+```ts
 try {
-  const chains = await sdk.marketPriceChains({ chainIndex: '1' });
+  const chains = await sdk.marketPriceChains({ chainIndex: "1" });
 } catch (err) {
-  console.error('Request failed:', err);
+  console.error("Request failed:", err);
 }
 ```
 
-### Balance APIs (Links in each item)
+### Balance APIs
 
 - balanceChains(): Retrieve chains supported by the Balance API.
 
-```
+```ts
 const chains = await sdk.balanceChains();
 ```
 
 - balanceTotalValue({ address, chains, assetType?, excludeRiskToken? }): Retrieve total balance across tokens and DeFi assets.
 
-```
+```ts
 const total = await sdk.balanceTotalValue({
-  address: '0xabc...',
-  chains: ['1','137'],
-  assetType: '0',
-  excludeRiskToken: '0',
+  address: "0xabc...",
+  chains: ["1", "137"],
+  assetType: "0",
+  excludeRiskToken: "0",
 });
 ```
 
 - balanceTotalTokenBalances({ address, chains, excludeRiskToken? }): Retrieve total token balances for an address.
 
-```
+```ts
 const tokens = await sdk.balanceTotalTokenBalances({
-  address: '0xabc...',
-  chains: ['1','137'],
-  excludeRiskToken: '0',
+  address: "0xabc...",
+  chains: ["1", "137"],
+  excludeRiskToken: "0",
 });
 ```
 
 - balanceSpecificTokenBalance({ address, tokenContractAddresses, excludeRiskToken? }): Retrieve balances for specific tokens.
 
-```
+```ts
 const specific = await sdk.balanceSpecificTokenBalance({
-  address: '0xabc...',
+  address: "0xabc...",
   tokenContractAddresses: [
-    { chainIndex: '1', tokenContractAddress: '0xToken...' },
-    { chainIndex: '137', tokenContractAddress: '0xToken...' },
+    { chainIndex: "1", tokenContractAddress: "0xToken..." },
+    { chainIndex: "137", tokenContractAddress: "0xToken..." },
   ],
-  excludeRiskToken: '0',
+  excludeRiskToken: "0",
 });
 ```
 
-### Market Price APIs (Links in each item)
+### Market Price APIs
 
 - marketPriceChains({ chainIndex? }): Retrieve chains supported by the Market API.
 
-```
-const chains = await sdk.marketPriceChains({ chainIndex: '1' });
+```ts
+const chains = await sdk.marketPriceChains({ chainIndex: "1" });
 ```
 
 - marketPrice({ chainIndex, tokenContractAddress }): Retrieve the latest price of a token.
 
-```
+```ts
 const price = await sdk.marketPrice({
-  chainIndex: '1',
-  tokenContractAddress: '0xToken...',
+  chainIndex: "1",
+  tokenContractAddress: "0xToken...",
 });
 ```
 
 - marketPriceInfo({ tokenContractAddresses }): Retrieve the latest prices for multiple tokens.
 
-```
+```ts
 const prices = await sdk.marketPriceInfo({
   tokenContractAddresses: [
-    { chainIndex: '1', tokenContractAddress: '0xTokenA' },
-    { chainIndex: '137', tokenContractAddress: '0xTokenB' },
+    { chainIndex: "1", tokenContractAddress: "0xTokenA" },
+    { chainIndex: "137", tokenContractAddress: "0xTokenB" },
   ],
 });
 ```
 
 - marketTrades({ chainIndex, tokenContractAddress, after?, limit? }): Retrieve recent trades of a token.
 
-```
+```ts
 const trades = await sdk.marketTrades({
-  chainIndex: '1',
-  tokenContractAddress: '0xToken...',
+  chainIndex: "1",
+  tokenContractAddress: "0xToken...",
   limit: 50,
 });
 ```
 
 - marketCandlesticks({ chainIndex, tokenContractAddress, after?, before?, bar?, limit? }): Retrieve candlestick data.
 
-```
+```ts
 const candles = await sdk.marketCandlesticks({
-  chainIndex: '1',
-  tokenContractAddress: '0xToken...',
-  bar: '1m',
+  chainIndex: "1",
+  tokenContractAddress: "0xToken...",
+  bar: "1m",
   limit: 100,
 });
 ```
 
 - marketCandlesticksHistory({ chainIndex, tokenContractAddress, after?, before?, bar?, limit? }): Retrieve historical candlesticks (if supported by API).
 
-```
+```ts
 const history = await sdk.marketCandlesticksHistory({
-  chainIndex: '1',
-  tokenContractAddress: '0xToken...',
-  bar: '5m',
+  chainIndex: "1",
+  tokenContractAddress: "0xToken...",
+  bar: "5m",
   limit: 200,
 });
 ```
 
-### Index Price APIs (Links in each item)
+### Index Price APIs
 
 - indexPriceChains(): Retrieve chains supported by Index Price API.
 
-```
+```ts
 const chains = await sdk.indexPriceChains();
 ```
 
 - indexPrice({ tokenContractAddresses }): Retrieve current index price for multiple tokens.
 
-```
+```ts
 const indexPrices = await sdk.indexPrice({
   tokenContractAddresses: [
-    { chainIndex: '1', tokenContractAddress: '0xTokenA' },
-    { chainIndex: '137', tokenContractAddress: '0xTokenB' },
+    { chainIndex: "1", tokenContractAddress: "0xTokenA" },
+    { chainIndex: "137", tokenContractAddress: "0xTokenB" },
   ],
 });
 ```
 
 - historicalIndexPrice({ chainIndex, tokenContractAddress?, limit?, cursor?, begin?, end?, period? }): Retrieve historical index price.
 
-```
+```ts
 const historical = await sdk.historicalIndexPrice({
-  chainIndex: '1',
-  tokenContractAddress: '0xToken...',
-  period: '5m',
+  chainIndex: "1",
+  tokenContractAddress: "0xToken...",
+  period: "5m",
   limit: 100,
 });
 ```
 
-### Transaction History APIs (Links in each item)
+### Transaction History APIs
 
 - txHistoryChains(): Retrieve chains supported by Transaction History API.
 
-```
+```ts
 const chains = await sdk.txHistoryChains();
 ```
 
 - txHistoryTransactionsByAddress({ address, chains, tokenContractAddress?, begin?, end?, cursor?, limit? }): Retrieve transactions for an address.
 
-```
+```ts
 const txs = await sdk.txHistoryTransactionsByAddress({
-  address: '0xabc...',
-  chains: ['1','137'],
-  begin: '1718928000000', // ms timestamp string
+  address: "0xabc...",
+  chains: ["1", "137"],
+  begin: "1718928000000", // ms timestamp string
   limit: 50,
 });
 ```
 
 - txHistorySpecificTransactionDetailByTxhash({ chainIndex, txHash, itype? }): Retrieve a specific transaction detail.
 
-```
+```ts
 const detail = await sdk.txHistorySpecificTransactionDetailByTxhash({
-  chainIndex: '1',
-  txHash: '0xTxHash...',
+  chainIndex: "1",
+  txHash: "0xTxHash...",
 });
 ```
+
+## Defaults and Parameters
+
+- marketTrades: `limit` defaults to `100`.
+- marketCandlesticks / marketCandlesticksHistory: `bar` defaults to `"1m"`, `limit` defaults to `100`.
+- balanceTotalValue: `assetType` defaults to `"0"`, `excludeRiskToken` defaults to `"0"`.
+- balanceTotalTokenBalances / balanceSpecificTokenBalance: `excludeRiskToken` defaults to `"0"`.
+- txHistoryTransactionsByAddress: `chains` is sent as a comma‑joined string; `begin`/`end` should be millisecond timestamp strings.
+
+Pagination and time parameters:
+
+- `cursor`: pass through the returned cursor for the next page when provided.
+- `after` / `before`: accepted as strings; OKX endpoints may interpret these as timestamps or cursors depending on the API. Use milliseconds where applicable.
+
+## Error Model
+
+- Non‑2xx HTTP responses throw with the raw response body.
+- OKX API responses with `code !== "0"` throw with `OKXError <code>: <msg>`.
+- No automatic retries or backoff are performed; implement your own if needed.
 
 ## Official Docs
 
