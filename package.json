@@ -1,6 +1,6 @@
 {
   "name": "okx-dex-market-sdk",
-  "version": "0.1.1",
+  "version": "1.0.0",
   "description": "OKX DEX Market SDK with a typed request builder and unified APIs.",
   "author": {
     "name": "Lance He",
@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "crypto-js": "^4.2.0",
-    "undici": "^7.15.0"
+    "undici": "^7.16.0"
   },
   "files": [
     "dist",
@@ -45,9 +45,9 @@
     "prepare": "bun run clean && bun run build"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.2.2",
+    "@biomejs/biome": "^2.2.4",
     "@types/crypto-js": "^4.2.2",
-    "@types/node": "^24.3.0",
+    "@types/node": "^24.5.2",
     "tsup": "^8.5.0",
     "typescript": "^5.9.2"
   }

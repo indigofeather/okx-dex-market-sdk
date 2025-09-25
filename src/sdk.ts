@@ -1,5 +1,10 @@
 import { OKXClient } from "./client";
-import { BASE_URL, type Credentials, getCredentialsFromEnv } from "./utils";
+import {
+  API_VERSION,
+  BASE_URL,
+  type Credentials,
+  getCredentialsFromEnv,
+} from "./utils";
 
 type SDKOptions = {
   baseUrl?: string;
@@ -34,10 +39,11 @@ export class OKXDexSDK {
     return this.client.getJSON<
       {
         chainIndex: string;
+        chainLogoUrl: string;
         chainName: string;
         chainSymbol: string;
       }[]
-    >("/api/v5/dex/market/supported/chain", {
+    >(`/api/${API_VERSION}/dex/market/supported/chain`, {
       chainIndex: params?.chainIndex,
     });
   }
@@ -58,33 +64,9 @@ export class OKXDexSDK {
         time: string;
         tokenContractAddress: string;
       }[]
-    >("/api/v5/dex/market/price", [{ chainIndex, tokenContractAddress }]);
-  }
-
-  /**
-   * Market API > Market Price API > Get Batch Token Price
-   * @link https://web3.okx.com/build/dev-docs/dex-api/dex-market-price-info
-   * @param params.tokenContractAddresses Array of { chainIndex, tokenContractAddress }
-   * @returns Latest prices for multiple tokens
-   */
-  marketPriceInfo(params: { tokenContractAddresses: { chainIndex: string; tokenContractAddress: string }[] }) {
-    return this.client.postJSON<
-      {
-        chainIndex: string;
-        marketCap: string;
-        price: string;
-        priceChange1H: string;
-        priceChange24H: string;
-        priceChange4H: string;
-        priceChange5M: string;
-        time: string;
-        tokenContractAddress: string;
-        volume1H: string;
-        volume24H: string;
-        volume4H: string;
-        volume5M: string;
-      }[]
-    >("/api/v5/dex/market/price-info", params.tokenContractAddresses);
+    >(`/api/${API_VERSION}/dex/market/price`, [
+      { chainIndex, tokenContractAddress },
+    ]);
   }
 
   /**
@@ -96,7 +78,12 @@ export class OKXDexSDK {
    * @param params.limit Optional page size
    * @returns Recent trades
    */
-  marketTrades(params: { chainIndex: string; tokenContractAddress: string; after?: string; limit?: number }) {
+  marketTrades(params: {
+    chainIndex: string;
+    tokenContractAddress: string;
+    after?: string;
+    limit?: number;
+  }) {
     const { chainIndex, tokenContractAddress, after, limit = 100 } = params;
     return this.client.getJSON<
       {
@@ -118,7 +105,7 @@ export class OKXDexSDK {
         userAddress: string;
         volume: string;
       }[]
-    >("/api/v5/dex/market/trades", {
+    >(`/api/${API_VERSION}/dex/market/trades`, {
       chainIndex,
       tokenContractAddress,
       after,
@@ -145,15 +132,25 @@ export class OKXDexSDK {
     bar?: string;
     limit?: number;
   }) {
-    const { chainIndex, tokenContractAddress, after, before, bar = "1m", limit = 100 } = params;
-    return this.client.getJSON<string[][]>("/api/v5/dex/market/candles", {
+    const {
       chainIndex,
       tokenContractAddress,
       after,
       before,
-      bar,
-      limit,
-    });
+      bar = "1m",
+      limit = 100,
+    } = params;
+    return this.client.getJSON<string[][]>(
+      `/api/${API_VERSION}/dex/market/candles`,
+      {
+        chainIndex,
+        tokenContractAddress,
+        after,
+        before,
+        bar,
+        limit,
+      }
+    );
   }
 
   /**
@@ -175,15 +172,25 @@ export class OKXDexSDK {
     bar?: string;
     limit?: number;
   }) {
-    const { chainIndex, tokenContractAddress, after, before, bar = "1m", limit = 100 } = params;
-    return this.client.getJSON<string[][]>("/api/v5/dex/market/historical-candles", {
+    const {
       chainIndex,
       tokenContractAddress,
       after,
       before,
-      bar,
-      limit,
-    });
+      bar = "1m",
+      limit = 100,
+    } = params;
+    return this.client.getJSON<string[][]>(
+      `/api/${API_VERSION}/dex/market/historical-candles`,
+      {
+        chainIndex,
+        tokenContractAddress,
+        after,
+        before,
+        bar,
+        limit,
+      }
+    );
   }
 
   // Index Price APIs
@@ -200,7 +207,7 @@ export class OKXDexSDK {
         shortName: string;
         chainIndex: string;
       }[]
-    >("/api/v5/dex/balance/supported/chain");
+    >(`/api/${API_VERSION}/dex/balance/supported/chain`);
   }
 
   /**
@@ -209,7 +216,12 @@ export class OKXDexSDK {
    * @param params.tokenContractAddresses Array of { chainIndex, tokenContractAddress }
    * @returns Current index price for given tokens
    */
-  indexPrice(params: { tokenContractAddresses: { chainIndex: string; tokenContractAddress: string }[] }) {
+  indexPrice(params: {
+    tokenContractAddresses: {
+      chainIndex: string;
+      tokenContractAddress: string;
+    }[];
+  }) {
     return this.client.postJSON<
       {
         chainIndex: string;
@@ -217,7 +229,10 @@ export class OKXDexSDK {
         price: string;
         tokenContractAddress: string;
       }[]
-    >("/api/v5/dex/index/current-price", params.tokenContractAddresses);
+    >(
+      `/api/${API_VERSION}/dex/index/current-price`,
+      params.tokenContractAddresses
+    );
   }
 
   /**
@@ -241,7 +256,15 @@ export class OKXDexSDK {
     end?: string;
     period?: string;
   }) {
-    const { chainIndex, tokenContractAddress, limit = 50, cursor, begin, end, period } = params;
+    const {
+      chainIndex,
+      tokenContractAddress,
+      limit = 50,
+      cursor,
+      begin,
+      end,
+      period,
+    } = params;
     return this.client.getJSON<
       {
         cursor: string;
@@ -250,7 +273,7 @@ export class OKXDexSDK {
           price: string;
         }[];
       }[]
-    >("/api/v5/dex/index/historical-price", {
+    >(`/api/${API_VERSION}/dex/index/historical-price`, {
       chainIndex,
       tokenContractAddress,
       limit,
@@ -258,6 +281,169 @@ export class OKXDexSDK {
       begin,
       end,
       period,
+    });
+  }
+
+  // Token APIs
+  /**
+   * Market API > Token API > Token Search
+   * @link https://web3.okx.com/build/dev-docs/dex-api/dex-market-token-search
+   * @param params.chains Array of chain indices
+   * @param params.search Search string
+   * @returns Token list
+   */
+  marketTokenSearch(params: { chains: string[]; search: string }) {
+    const { chains, search } = params;
+    return this.client.getJSON<
+      {
+        chainIndex: string;
+        change: string;
+        decimal: string;
+        explorerUrl: string;
+        holders: string;
+        liquidity: string;
+        marketCap: string;
+        price: string;
+        tagList: {
+          communityRecognized: boolean;
+        };
+        tokenContractAddress: string;
+        tokenLogoUrl: string;
+        tokenName: string;
+        tokenSymbol: string;
+      }[]
+    >(`/api/${API_VERSION}/dex/market/token/search`, {
+      chains: chains.join(","),
+      search,
+    });
+  }
+
+  /**
+   * Market API > Token API > Token Basic Information
+   * @link https://web3.okx.com/build/dev-docs/dex-api/dex-market-token-basic-info
+   * @param params Array of { chainIndex, tokenContractAddress }
+   * @returns Token basic info
+   */
+  marketTokenBasicInfo(
+    params: {
+      chainIndex: string;
+      tokenContractAddress: string;
+    }[]
+  ) {
+    return this.client.postJSON<
+      {
+        chainIndex: string;
+        decimal: string;
+        tagList: {
+          communityRecognized: boolean;
+        };
+        tokenContractAddress: string;
+        tokenLogoUrl: string;
+        tokenName: string;
+        tokenSymbol: string;
+      }[]
+    >(`/api/${API_VERSION}/dex/market/token/basic-info`, params);
+  }
+
+  /**
+   * Market API > Token API > Token Trading Information
+   * @link https://web3.okx.com/build/dev-docs/dex-api/dex-market-token-price-info
+   * @param params Array of { chainIndex, tokenContractAddress }
+   * @returns Token trading info
+   */
+  marketTokenPriceInfo(
+    params: {
+      chainIndex: string;
+      tokenContractAddress: string;
+    }[]
+  ) {
+    return this.client.postJSON<
+      {
+        chainIndex: string;
+        circSupply: string;
+        holders: string;
+        liquidity: string;
+        marketCap: string;
+        maxPrice: string;
+        minPrice: string;
+        price: string;
+        priceChange1H: string;
+        priceChange24H: string;
+        priceChange4H: string;
+        priceChange5M: string;
+        time: string;
+        tokenContractAddress: string;
+        tradeNum: string;
+        txs1H: string;
+        txs24H: string;
+        txs4H: string;
+        txs5M: string;
+        volume1H: string;
+        volume24H: string;
+        volume4H: string;
+        volume5M: string;
+      }[]
+    >(`/api/${API_VERSION}/dex/market/price-info`, params);
+  }
+
+  /**
+   * Market API > Token API > Token Ranking List
+   * @link https://web3.okx.com/build/dev-docs/dex-api/dex-market-token-ranking
+   * @param params.chains Array of chain indices
+   * @param params.sortBy Sort by field
+   * @param params.timeFrame Time frame
+   */
+  marketTokenRanking(params: {
+    chains: string[];
+    sortBy: string;
+    timeFrame: string;
+  }) {
+    const { chains, sortBy, timeFrame } = params;
+    return this.client.getJSON<
+      {
+        chainIndex: string;
+        change: string;
+        firstTradeTime: string;
+        holders: string;
+        liquidity: string;
+        marketCap: string;
+        price: string;
+        tokenContractAddress: string;
+        tokenLogoUrl: string;
+        tokenSymbol: string;
+        txs: string;
+        txsBuy: string;
+        txsSell: string;
+        uniqueTraders: string;
+        volume: string;
+      }[]
+    >(`/api/${API_VERSION}/dex/market/token/toplist`, {
+      chains: chains.join(","),
+      sortBy,
+      timeFrame,
+    });
+  }
+
+  /**
+   * Market API > Token API > Top Token Holder
+   * @link https://web3.okx.com/build/dev-docs/dex-api/dex-market-token-holder
+   * @param params.chainIndex Chain index
+   * @param params.tokenContractAddress Token contract address
+   * @returns Top token holder
+   */
+  marketTokenHolder(params: {
+    chainIndex: string;
+    tokenContractAddress: string;
+  }) {
+    const { chainIndex, tokenContractAddress } = params;
+    return this.client.getJSON<
+      {
+        holdAmount: string;
+        holderWalletAddress: string;
+      }[]
+    >(`/api/${API_VERSION}/dex/market/token/holder`, {
+      chainIndex,
+      tokenContractAddress,
     });
   }
 
@@ -275,7 +461,7 @@ export class OKXDexSDK {
         shortName: string;
         chainIndex: string;
       }[]
-    >("/api/v5/dex/balance/supported/chain");
+    >(`/api/${API_VERSION}/dex/balance/supported/chain`);
   }
 
   /**
@@ -287,14 +473,22 @@ export class OKXDexSDK {
    * @param params.excludeRiskToken Optional flag (default '0')
    * @returns Total portfolio value
    */
-  balanceTotalValue(params: { address: string; chains: string[]; assetType?: string; excludeRiskToken?: string }) {
+  balanceTotalValue(params: {
+    address: string;
+    chains: string[];
+    assetType?: string;
+    excludeRiskToken?: string;
+  }) {
     const { address, chains, assetType = "0", excludeRiskToken = "0" } = params;
-    return this.client.getJSON<{ totalValue: string }[]>("/api/v5/dex/balance/total-value-by-address", {
-      address,
-      chains: chains.join(","),
-      assetType,
-      excludeRiskToken,
-    });
+    return this.client.getJSON<{ totalValue: string }[]>(
+      `/api/${API_VERSION}/dex/balance/total-value-by-address`,
+      {
+        address,
+        chains: chains.join(","),
+        assetType,
+        excludeRiskToken,
+      }
+    );
   }
 
   /**
@@ -305,7 +499,11 @@ export class OKXDexSDK {
    * @param params.excludeRiskToken Optional flag (default '0')
    * @returns Aggregated token balances
    */
-  balanceTotalTokenBalances(params: { address: string; chains: string[]; excludeRiskToken?: string }) {
+  balanceTotalTokenBalances(params: {
+    address: string;
+    chains: string[];
+    excludeRiskToken?: string;
+  }) {
     const { address, chains, excludeRiskToken = "0" } = params;
     return this.client.getJSON<
       {
@@ -320,7 +518,7 @@ export class OKXDexSDK {
           address: string;
         }[];
       }[]
-    >("/api/v5/dex/balance/all-token-balances-by-address", {
+    >(`/api/${API_VERSION}/dex/balance/all-token-balances-by-address`, {
       address,
       chains: chains.join(","),
       excludeRiskToken,
@@ -337,7 +535,10 @@ export class OKXDexSDK {
    */
   balanceSpecificTokenBalance(params: {
     address: string;
-    tokenContractAddresses: { chainIndex: string; tokenContractAddress: string }[];
+    tokenContractAddresses: {
+      chainIndex: string;
+      tokenContractAddress: string;
+    }[];
     excludeRiskToken?: string;
   }) {
     const { address, tokenContractAddresses, excludeRiskToken = "0" } = params;
@@ -354,7 +555,7 @@ export class OKXDexSDK {
           address: string;
         }[];
       }[]
-    >("/api/v5/dex/balance/token-balances-by-address", {
+    >(`/api/${API_VERSION}/dex/balance/token-balances-by-address`, {
       address,
       tokenContractAddresses,
       excludeRiskToken,
@@ -375,7 +576,7 @@ export class OKXDexSDK {
         shortName: string;
         chainIndex: string;
       }[]
-    >("/api/v5/dex/balance/supported/chain");
+    >(`/api/${API_VERSION}/dex/balance/supported/chain`);
   }
 
   /**
@@ -399,13 +600,15 @@ export class OKXDexSDK {
     cursor?: string;
     limit?: number;
   }) {
-    const { address, chains, tokenContractAddress, begin, end, cursor, limit } = params;
+    const { address, chains, tokenContractAddress, begin, end, cursor, limit } =
+      params;
     return this.client.getJSON<
       {
         cursor: string;
-        transactionList: {
+        transactions: {
           chainIndex: string;
           txHash: string;
+          itype: string;
           methodId: string;
           nonce: string;
           txTime: string;
@@ -421,13 +624,11 @@ export class OKXDexSDK {
           amount: string;
           symbol: string;
           txFee: string;
-          txStatus: string;
+          txStatus: "success";
           hitBlacklist: boolean;
-          tag: string;
-          itype: string;
         }[];
       }[]
-    >("/api/v5/dex/post-transaction/transactions-by-address", {
+    >(`/api/${API_VERSION}/dex/post-transaction/transactions-by-address`, {
       address,
       chains: chains?.join(","),
       tokenContractAddress,
@@ -446,7 +647,11 @@ export class OKXDexSDK {
    * @param params.itype Optional internal type
    * @returns Transaction detail
    */
-  txHistorySpecificTransactionDetailByTxhash(params: { chainIndex: string; txHash: string; itype?: string }) {
+  txHistorySpecificTransactionDetailByTxhash(params: {
+    chainIndex: string;
+    txHash: string;
+    itype?: string;
+  }) {
     const { chainIndex, txHash, itype } = params;
     return this.client.getJSON<
       {
@@ -497,7 +702,7 @@ export class OKXDexSDK {
           amount: string;
         }[];
       }[]
-    >("/api/v5/dex/post-transaction/transaction-detail-by-txhash", {
+    >(`/api/${API_VERSION}/dex/post-transaction/transaction-detail-by-txhash`, {
       chainIndex,
       txHash,
       itype,

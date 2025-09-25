@@ -1,4 +1,5 @@
 export const BASE_URL = "https://web3.okx.com";
+export const API_VERSION = "v6";
 
 export type Credentials = {
   apiKey: string;
@@ -14,7 +15,9 @@ export function getCredentialsFromEnv(): Credentials {
   const projectId = process.env.OKX_PROJECT_ID;
 
   if (!apiKey || !secretKey || !passphrase || !projectId) {
-    throw new Error("Missing required environment variables: OKX_API_KEY/OKX_SECRET_KEY/OKX_API_PASSPHRASE/OKX_PROJECT_ID");
+    throw new Error(
+      "Missing required environment variables: OKX_API_KEY/OKX_SECRET_KEY/OKX_API_PASSPHRASE/OKX_PROJECT_ID"
+    );
   }
 
   return { apiKey, secretKey, passphrase, projectId };
